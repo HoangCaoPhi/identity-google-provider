@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Home from "./views/Home";
-import GoogleLoginButton from "./components/GoogleLoginButton";
+import Login from "./components/Login";
 
 const App: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem("jwt");
@@ -14,7 +14,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<GoogleLoginButton />} />
+        <Route path="/login" element={<Login />} />
 
         <Route
           path="/home"

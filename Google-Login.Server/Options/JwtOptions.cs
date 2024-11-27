@@ -2,7 +2,7 @@
 
 public class JwtOptions
 {
-    public static string GetSection() => "Jwt";
+    public const string SectionName = "Jwt";
     public required string Key { get; set; }
 
     public required string Issuer { get; set; }

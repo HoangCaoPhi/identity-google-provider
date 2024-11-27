@@ -1,13 +1,14 @@
 import React from "react";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin, useGoogleOneTapLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Paper, Stack } from "@mui/material";
 
-const GoogleLoginButton: React.FC = () => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleLoginSuccess = (credentialResponse: any) => {
-    console.log("Login Success:", credentialResponse);
+
+  const handleLoginSuccess = (token: any) => {
+    console.log("Login Success:", token);
 
     fetch("api/auth/google", {
       method: "POST",
@@ -15,7 +16,7 @@ const GoogleLoginButton: React.FC = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        token: credentialResponse.credential,
+        token: token,
       }),
     })
       .then((res) => res.json())
@@ -28,10 +29,20 @@ const GoogleLoginButton: React.FC = () => {
         console.error("Login failed:", error);
       });
   };
-
-  const handleLoginError = () => {
-    console.error("Login Failed");
-  };
+ 
+  const login = useGoogleLogin({
+    onSuccess: tokenResponse => handleLoginSuccess(tokenResponse?.access_token),
+  });
+  
+  
+  useGoogleOneTapLogin({
+    onSuccess: credentialResponse => {
+      handleLoginSuccess(credentialResponse?.credential)
+    },
+    onError: () => {
+      console.log('Login Failed');
+    },
+  });  
 
   return (
     <Box
@@ -58,16 +69,15 @@ const GoogleLoginButton: React.FC = () => {
         <Typography variant="body1" color="textSecondary" paragraph>
           Please log in with Google to continue
         </Typography>
+
+        {/* Google Custom Login */}
         <Stack spacing={2} direction="column">
-          <GoogleLogin
-            onSuccess={handleLoginSuccess}
-            onError={handleLoginError}
-            width="100%"
-          />
-        </Stack>
+          <button onClick={() => login()}>Sign in with Google 🚀</button>
+        </Stack>        
+ 
       </Paper>
     </Box>
   );
 };
 
-export default GoogleLoginButton;
+export default Login;

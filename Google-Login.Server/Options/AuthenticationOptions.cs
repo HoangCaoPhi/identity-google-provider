@@ -8,7 +8,7 @@ public class GoogleOptions
 
 public class AuthenticationOptions
 {
-    public static string GetSection() => "Authentication";
+    public const string SectionName = "Authentication";
 
     public required GoogleOptions Google { get; init; }
 }

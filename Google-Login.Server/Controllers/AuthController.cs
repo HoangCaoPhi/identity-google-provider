@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth;
+﻿using google_login.Server.Abtractions;
 using google_login.Server.Options;
 using Google_Login.Server.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,46 +12,28 @@ namespace Google_Login.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IOptions<JwtOptions> jwtOptions,
-                            IOptions<AuthenticationOptions> authenticationOptions) : Controller
+public class AuthController(IOptions<JwtOptions> jwtOptions, 
+                            IGoogleLoginProvider googleLoginProvider) : Controller
 {
 
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
-    private readonly AuthenticationOptions _authenticationOptions = authenticationOptions.Value;
-
+ 
     [HttpPost("google")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
     {
-        var payload = await ValidateGoogleToken(request.Token);
+        var payload = await googleLoginProvider.ValidateTokenAsync(request.Token);
         if (payload is null)
             return BadRequest("Invalid Google Token");
 
         var jwtToken = GenerateJwtToken(payload);
         return Ok(new { token = jwtToken });
     }
-
-    private async Task<GoogleJsonWebSignature.Payload> ValidateGoogleToken(string token)
-    {
-        try
-        {
-            var settings = new GoogleJsonWebSignature.ValidationSettings
-            {
-                Audience = [_authenticationOptions.Google.ClientId]
-            };
-            var payload = await GoogleJsonWebSignature.ValidateAsync(token, settings);
-            return payload;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private string GenerateJwtToken(GoogleJsonWebSignature.Payload payload)
+ 
+    private string GenerateJwtToken(GoogleUserInfoResponse? payload)
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, payload.Subject),
+            new Claim(JwtRegisteredClaimNames.Sub, payload.Sub),
             new Claim(JwtRegisteredClaimNames.Email, payload.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

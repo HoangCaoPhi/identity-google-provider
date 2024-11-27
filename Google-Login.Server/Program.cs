@@ -9,12 +9,15 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
 builder.Services.AddOptions<JwtOptions>()
-                .BindConfiguration(JwtOptions.GetSection())
+                .BindConfiguration(JwtOptions.SectionName)
                 .ValidateOnStart();
 
 builder.Services.AddOptions<AuthenticationOptions>()
-                .BindConfiguration(AuthenticationOptions.GetSection())
+                .BindConfiguration(AuthenticationOptions.SectionName)
                 .ValidateOnStart();
+
+builder.Services.AddOptions<ReCaptchaOptions>()
+                .BindConfiguration(ReCaptchaOptions.SectionName);
 
 builder.Services.AddJwt(builder.Configuration);
 
